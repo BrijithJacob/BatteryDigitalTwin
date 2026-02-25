@@ -1,0 +1,299 @@
+{
+  "@context": "dtmi:dtdl:context;3",
+  "@id": "dtmi:battery:DigitalTwin;2",
+  "@type": "Interface",
+  "displayName": "Battery Digital Twin with Neural Network",
+  "description": "Battery Digital Twin with Neural Network",
+
+  "contents": [
+    {
+      "@type": "Component",
+      "name": "physicalBatterySystem",
+      "schema": "dtmi:battery:PhysicalBatterySystem;2",
+      "displayName": "Physical Battery System"
+    },
+    {
+      "@type": "Component",
+      "name": "neuralNetwork",
+      "schema": "dtmi:battery:NeuralNetworkModel;2",
+      "displayName": "Neural Network Prediction Model"
+    },
+
+    {
+      "@type": "Telemetry",
+      "name": "digitalTwinState",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "currentState",
+            "schema": {
+              "@type": "Object",
+              "fields": [
+                {
+                  "name": "chargeLevel",
+                  "schema": "double"
+                },
+                {
+                  "name": "voltage",
+                  "schema": "double"
+                },
+                {
+                  "name": "temperature",
+                  "schema": "double"
+                },
+                {
+                  "name": "isCharging",
+                  "schema": "boolean"
+                },
+                {
+                  "name": "powerConsumption",
+                  "schema": "double"
+                }
+              ]
+            }
+          },
+          {
+            "name": "predictedState",
+            "schema": {
+              "@type": "Object",
+              "fields": [
+                {
+                  "name": "chargeLevel",
+                  "schema": "double"
+                },
+                {
+                  "name": "voltage",
+                  "schema": "double"
+                },
+                {
+                  "name": "hoursAhead",
+                  "schema": "double"
+                },
+                {
+                  "name": "uncertainty",
+                  "schema": "double"
+                },
+                {
+                  "name": "confidence",
+                  "schema": "double"
+                },
+                {
+                  "name": "predictionInterval",
+                  "schema": {
+                    "@type": "Object",
+                    "fields": [
+                      {
+                        "name": "lower",
+                        "schema": "double"
+                      },
+                      {
+                        "name": "upper",
+                        "schema": "double"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Digital Twin State",
+      "description": "Snapshot of current and predicted battery state"
+    },
+
+    {
+      "@type": "Command",
+      "name": "synchronizeState",
+      "displayName": "Synchronize Digital Twin",
+      "description": "Update digital twin state from physical battery system",
+      "response": {
+        "name": "syncResult",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "success",
+              "schema": "boolean"
+            },
+            {
+              "name": "physicalStateUpdated",
+              "schema": "boolean"
+            },
+            {
+              "name": "neuralNetworkInputsRefreshed",
+              "schema": "boolean"
+            },
+            {
+              "name": "timestamp",
+              "schema": "dateTime"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "updatePrediction",
+      "displayName": "Update Prediction",
+      "description": "Generate neural network prediction for specified time horizon",
+      "request": {
+        "name": "predictionParams",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "hoursAhead",
+              "schema": "double"
+            },
+            {
+              "name": "useUncertaintyEstimation",
+              "schema": "boolean",
+              "description": "Enable Monte Carlo dropout for uncertainty"
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "predictionResult",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "predictedCharge",
+              "schema": "double"
+            },
+            {
+              "name": "predictedVoltage",
+              "schema": "double"
+            },
+            {
+              "name": "uncertainty",
+              "schema": "double"
+            },
+            {
+              "name": "confidence",
+              "schema": "double"
+            },
+            {
+              "name": "predictionInterval",
+              "schema": {
+                "@type": "Object",
+                "fields": [
+                  {
+                    "name": "lower",
+                    "schema": "double"
+                  },
+                  {
+                    "name": "upper",
+                    "schema": "double"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "inferenceTimeMs",
+              "schema": "double"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "trainModel",
+      "displayName": "Train Neural Network",
+      "description": "Execute full training cycle on historical data",
+      "request": {
+        "name": "trainingConfig",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "dataSource",
+              "schema": "string",
+              "description": "Data source: 'sqlite_history', 'streaming_buffer', 'external'"
+            },
+            {
+              "name": "timeRangeHours",
+              "schema": "integer",
+              "description": "Historical data window"
+            },
+            {
+              "name": "epochs",
+              "schema": "integer"
+            },
+            {
+              "name": "batchSize",
+              "schema": "integer"
+            },
+            {
+              "name": "validationSplit",
+              "schema": "double"
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "trainingResult",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "success",
+              "schema": "boolean"
+            },
+            {
+              "name": "finalLoss",
+              "schema": "double"
+            },
+            {
+              "name": "validationAccuracy",
+              "schema": "double"
+            },
+            {
+              "name": "trainingDurationSeconds",
+              "schema": "double"
+            },
+            {
+              "name": "modelSaved",
+              "schema": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "enablePowerSavingMode",
+      "displayName": "Enable Power Saving Mode",
+      "description": "Activate OS-level power saving features",
+      "response": {
+        "name": "powerSavingStatus",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "activated",
+              "schema": "boolean"
+            },
+            {
+              "name": "mode",
+              "schema": "string",
+              "description": "Mode applied: 'low_power', 'best_performance', 'custom'"
+            },
+            {
+              "name": "message",
+              "schema": "string"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "@context": "dtmi:dtdl:context;3",
+  "@id": "dtmi:battery:PhysicalBatterySystem;2",
+  "@type": "Interface",
+  "displayName": "Physical Battery System",
+  "description": "Physical Battery System",
+
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "currentCapacity",
+      "schema": "integer",
+      "description": "Current battery capacity in mAh"
+    },
+    {
+      "@type": "Property",
+      "name": "maxCapacity",
+      "schema": "integer",
+      "description": "Maximum battery capacity in mAh"
+    },
+    {},
+    {
+      "@type": "Property",
+      "name": "chargeLevel",
+      "schema": "double",
+      "description": "Battery charge percentage (0-100%)"
+    },
+    {
+      "@type": "Property",
+      "name": "voltage",
+      "schema": "double",
+      "description": "Battery voltage in volts"
+    },
+    {
+      "@type": "Property",
+      "name": "current",
+      "schema": "double",
+      "description": "Battery current in mA (positive = charging, negative = discharging)"
+    },
+    {
+      "@type": "Property",
+      "name": "temperature",
+      "schema": "double",
+      "description": "Battery temperature in Celsius"
+    },
+    {
+      "@type": "Property",
+      "name": "isCharging",
+      "schema": "boolean",
+      "description": "Whether battery is currently charging"
+    },
+    {
+      "@type": "Property",
+      "name": "cycleCount",
+      "schema": "integer",
+      "description": "Total charge/discharge cycles"
+    },
+    {
+      "@type": "Property",
+      "name": "powerConsumption",
+      "schema": "double",
+      "description": "Current power consumption in watts"
+    },
+    {},
+    {
+      "@type": "Telemetry",
+      "name": "batteryStateSnapshot",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "chargeLevel",
+            "schema": "double"
+          },
+          {
+            "name": "voltage",
+            "schema": "double"
+          },
+          {
+            "name": "current",
+            "schema": "double"
+          },
+          {
+            "name": "temperature",
+            "schema": "double"
+          },
+          {
+            "name": "isCharging",
+            "schema": "boolean"
+          },
+          {
+            "name": "powerConsumption",
+            "schema": "double"
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Battery State Snapshot",
+      "description": "Periodic snapshot of  battery state"
+    },
+    {},
+    {
+      "@type": "Telemetry",
+      "name": "dischargeObservation",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "initialCharge",
+            "schema": "double"
+          },
+          {
+            "name": "finalCharge",
+            "schema": "double"
+          },
+          {
+            "name": "initialVoltage",
+            "schema": "double"
+          },
+          {
+            "name": "finalVoltage",
+            "schema": "double"
+          },
+          {
+            "name": "averageTemperature",
+            "schema": "double"
+          },
+          {
+            "name": "averagePowerConsumption",
+            "schema": "double"
+          },
+          {
+            "name": "durationMinutes",
+            "schema": "double"
+          },
+          {
+            "name": "dischargeRate",
+            "schema": "double"
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Discharge Observation",
+      "description": "Ground truth discharge event"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "timeSeriesWindow",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "sequenceLength",
+            "schema": "integer"
+          },
+          {
+            "name": "chargeLevels",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "voltages",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "temperatures",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "powerConsumptions",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "timestamps",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "dateTime"
+            }
+          }
+        ]
+      },
+      "displayName": "Time Series Window",
+      "description": "Sequential data window for NN"
+    },
+    {
+      "@type": "Command",
+      "name": "readBatteryInfo",
+      "displayName": "Read Battery Information",
+      "description": "Query system APIs (ioreg) for current battery state",
+      "response": {
+        "name": "batteryInfo",
+        "schema": {
+          "@type": "Object",
+          "fields":[ {
+            "name": "propertyName",
+            "schema": "string"
+          },
+           {
+            "name": "value",
+            "schema": "string"
+          }]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "getTimeSeriesData",
+      "displayName": "Get Time Series Data",
+      "description": "Retrieve sequential battery measurements for neural network training",
+      "request": {
+        "name": "timeSeriesParams",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "windowSizeMinutes",
+              "schema": "integer"
+            },
+            {
+              "name": "samplingIntervalSeconds",
+              "schema": "integer"
+            },
+            {
+              "name": "endTimestamp",
+              "schema": "dateTime"
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "timeSeriesData",
+        "schema": {
+          "@type": "Array",
+          "elementSchema": {
+            "@type": "Object",
+            "fields": [
+              {
+                "name": "timestamp",
+                "schema": "dateTime"
+              },
+              {
+                "name": "chargeLevel",
+                "schema": "double"
+              },
+              {
+                "name": "voltage",
+                "schema": "double"
+              },
+              {
+                "name": "temperature",
+                "schema": "double"
+              },
+              {
+                "name": "powerConsumption",
+                "schema": "double"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "getHistoricalData",
+      "displayName": "Get Historical Battery Data",
+      "description": "Retrieve historical battery measurements from SQLite database",
+      "request": {
+        "name": "queryParams",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "startTime",
+              "schema": "dateTime"
+            },
+            {
+              "name": "endTime",
+              "schema": "dateTime"
+            },
+            {
+              "name": "chargingFilter",
+              "schema": "string",
+              "description": "Filter: 'all', 'charging', 'discharging'"
+            },
+            {
+              "name": "maxRecords",
+              "schema": "integer"
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "historicalRecords",
+        "schema": {
+          "@type": "Array",
+          "elementSchema": {
+            "@type": "Object",
+            "fields": [
+              {
+                "name": "timestamp",
+                "schema": "dateTime"
+              },
+              {
+                "name": "chargePercentage",
+                "schema": "double"
+              },
+              {
+                "name": "voltage",
+                "schema": "double"
+              },
+              {
+                "name": "temperature",
+                "schema": "double"
+              },
+              {
+                "name": "isCharging",
+                "schema": "boolean"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

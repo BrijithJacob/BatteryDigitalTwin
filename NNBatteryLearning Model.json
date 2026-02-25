@@ -1,0 +1,585 @@
+{
+  "@context": "dtmi:dtdl:context;3",
+  "@id": "dtmi:battery:NeuralNetworkModel;2",
+  "@type": "Interface",
+  "displayName": "Neural Network Battery Prediction Model",
+  "description": "Deep learning model for battery state prediction",
+
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "architecture",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "networkType",
+            "schema": "string",
+            "description": "Network architecture: 'feedforward', 'lstm', 'gru', 'transformer'"
+          },
+          {
+            "name": "inputSize",
+            "schema": "integer"
+          },
+          {
+            "name": "hiddenLayers",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "integer"
+            },
+            "description": "Neurons in each hidden layer"
+          },
+          {
+            "name": "outputSize",
+            "schema": "integer"
+          },
+          {
+            "name": "activationFunction",
+            "schema": "string",
+            "description": "Activation: 'relu', 'tanh', 'sigmoid', 'leaky_relu'"
+          },
+          {
+            "name": "dropoutRate",
+            "schema": "double"
+          }
+        ]
+      },
+      "writable": true,
+      "description": "Neural network architecture configuration"
+    },
+    {
+      "@type": "Property",
+      "name": "weights",
+      "schema": {
+        "@type": "Array",
+        "elementSchema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "layerIndex",
+              "schema": "integer"
+            },
+            {
+              "name": "weightMatrix",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "double"
+              },
+              "description": "Flattened weight matrix"
+            },
+            {
+              "name": "shape",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "integer"
+              },
+              "description": "Original matrix dimensions [rows, cols]"
+            }
+          ]
+        }
+      },
+      "writable": true,
+      "description": "Neural network weights for all layers"
+    },
+    {
+      "@type": "Property",
+      "name": "biases",
+      "schema": {
+        "@type": "Array",
+        "elementSchema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "layerIndex",
+              "schema": "integer"
+            },
+            {
+              "name": "biasVector",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "double"
+              }
+            }
+          ]
+        }
+      },
+      "writable": true,
+      "description": "Neural network biases for all layers"
+    },
+    {
+      "@type": "Property",
+      "name": "normalizationParams",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "inputMean",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "inputStd",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "outputMean",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          },
+          {
+            "name": "outputStd",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            }
+          }
+        ]
+      },
+      "writable": true,
+      "description": "Input/output normalization parameters for neural network"
+    },
+    {
+      "@type": "Property",
+      "name": "trainingHyperparameters",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "learningRate",
+            "schema": "double"
+          },
+          {
+            "name": "batchSize",
+            "schema": "integer"
+          },
+          {
+            "name": "epochs",
+            "schema": "integer"
+          },
+          {
+            "name": "optimizer",
+            "schema": "string",
+            "description": "Optimizer: 'sgd', 'adam', 'rmsprop', 'adagrad'"
+          },
+          {
+            "name": "lossFunction",
+            "schema": "string",
+            "description": "Loss: 'mse', 'mae', 'huber', 'quantile'"
+          },
+          {
+            "name": "regularization",
+            "schema": {
+              "@type": "Object",
+              "fields": [
+                {
+                  "name": "l1Lambda",
+                  "schema": "double"
+                },
+                {
+                  "name": "l2Lambda",
+                  "schema": "double"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "writable": true,
+      "description": "Training hyperparameters"
+    },
+    {
+      "@type": "Property",
+      "name": "trainingStatus",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "isTraining",
+            "schema": "boolean"
+          },
+          {
+            "name": "currentEpoch",
+            "schema": "integer"
+          },
+          {
+            "name": "totalEpochs",
+            "schema": "integer"
+          },
+          {
+            "name": "trainingLoss",
+            "schema": "double"
+          },
+          {
+            "name": "validationLoss",
+            "schema": "double"
+          },
+          {
+            "name": "lastTrainingTimestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "writable": true,
+      "description": "Current training status"
+    },
+    
+   
+    {
+      "@type": "Telemetry",
+      "name": "trainingBatchEvent",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "epoch",
+            "schema": "integer"
+          },
+          {
+            "name": "batchNumber",
+            "schema": "integer"
+          },
+          {
+            "name": "batchLoss",
+            "schema": "double"
+          },
+          {
+            "name": "learningRate",
+            "schema": "double"
+          },
+          {
+            "name": "gradientNorm",
+            "schema": "double"
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Training Batch Event",
+      "description": "Emitted after each training batch for monitoring convergence"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "predictionEvent",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "inputSequence",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            },
+            "description": "Normalized input features"
+          },
+          {
+            "name": "predictedCharge",
+            "schema": "double"
+          },
+          {
+            "name": "predictedVoltage",
+            "schema": "double"
+          },
+          {
+            "name": "hoursAhead",
+            "schema": "double"
+          },
+          {
+            "name": "confidenceScore",
+            "schema": "double",
+            "description": "Model confidence (0-1) based on ensemble variance or dropout"
+          },
+          {
+            "name": "uncertaintyEstimate",
+            "schema": "double",
+            "description": "Epistemic + aleatoric uncertainty"
+          },
+          {
+            "name": "hiddenStateSnapshot",
+            "schema": {
+              "@type": "Array",
+              "elementSchema": "double"
+            },
+            "description": "Last hidden layer activations for interpretability"
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Prediction Event",
+      "description": "Emitted for each neural network prediction with internal state"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "modelDriftMetric",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "driftScore",
+            "schema": "double",
+            "description": "Statistical distance between recent and historical predictions"
+          },
+          {
+            "name": "performanceDegradation",
+            "schema": "double",
+            "description": "Percentage increase in prediction error"
+          },
+          {
+            "name": "distributionShift",
+            "schema": "double",
+            "description": "KL divergence or Wasserstein distance"
+          },
+          {
+            "name": "retrainingRecommended",
+            "schema": "boolean"
+          },
+          {
+            "name": "timestamp",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "displayName": "Model Drift Metric",
+      "description": "Quantifies concept drift and triggers retraining"
+    },
+    {
+      "@type": "Command",
+      "name": "predict",
+      "displayName": "Neural Network Prediction",
+      "description": "Forward pass through neural network for battery state prediction",
+      "request": {
+        "name": "predictionInput",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "inputFeatures",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "double"
+              },
+              "description": "Raw or normalized feature vector"
+            },
+            {},
+            {
+              "name": "hoursAhead",
+              "schema": "double"
+            },
+            {}
+          ]
+        }
+      },
+      "response": {
+        "name": "predictionOutput",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "predictedCharge",
+              "schema": "double"
+            },
+            {
+              "name": "predictedVoltage",
+              "schema": "double"
+            },
+            {
+              "name": "uncertainty",
+              "schema": "double"
+            },
+            {
+              "name": "confidence",
+              "schema": "double"
+            },
+            {
+              "name": "predictionInterval",
+              "schema": {
+                "@type": "Object",
+                "fields": [
+                  {
+                    "name": "lower",
+                    "schema": "double"
+                  },
+                  {
+                    "name": "upper",
+                    "schema": "double"
+                  },
+                  {
+                    "name": "confidenceLevel",
+                    "schema": "double"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "train",
+      "displayName": "Batch Train Neural Network",
+      "description": "Full training cycle with backpropagation on historical dataset",
+      "request": {
+        "name": "trainingData",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "inputSequences",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": {
+                  "@type": "Array",
+                  "elementSchema": "double"
+                }
+              }
+            },
+            {
+              "name": "targetValues",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "double"
+              }
+            },
+
+            {
+              "name": "hyperparameters",
+              "schema": {
+                "@type": "Object",
+                "fields": [
+                  {
+                    "name": "epochs",
+                    "schema": "integer"
+                  },
+                  {
+                    "name": "batchSize",
+                    "schema": "integer"
+                  },
+                  {
+                    "name": "learningRate",
+                    "schema": "double"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "trainingResult",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "status",
+              "schema": "string"
+            },
+            {
+              "name": "finalTrainingLoss",
+              "schema": "double"
+            },
+            {
+              "name": "finalValidationLoss",
+              "schema": "double"
+            },
+            {
+              "name": "epochsCompleted",
+              "schema": "integer"
+            },
+            {
+              "name": "trainingTimeSeconds",
+              "schema": "double"
+            },
+            {
+              "name": "bestModelSaved",
+              "schema": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "@type": "Command",
+      "name": "onlineLearn",
+      "displayName": "Online Learning Update",
+      "description": "Incremental weight update using backpropagation on new observation",
+      "request": {
+        "name": "onlineSample",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "inputFeatures",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": "double"
+              }
+            },
+            {
+              "name": "sequenceData",
+              "schema": {
+                "@type": "Array",
+                "elementSchema": {
+                  "@type": "Array",
+                  "elementSchema": "double"
+                }
+              },
+              "description": "For recurrent networks"
+            },
+            {
+              "name": "actualCharge",
+              "schema": "double"
+            },
+            {
+              "name": "actualVoltage",
+              "schema": "double"
+            },
+            {
+              "name": "hoursElapsed",
+              "schema": "double"
+            }
+          ]
+        }
+      },
+      "response": {
+        "name": "updateResult",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "success",
+              "schema": "boolean"
+            },
+            {
+              "name": "loss",
+              "schema": "double"
+            },
+            {
+              "name": "gradientNorm",
+              "schema": "double"
+            },
+            {
+              "name": "weightsUpdated",
+              "schema": "boolean"
+            },
+            {
+              "name": "message",
+              "schema": "string"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
